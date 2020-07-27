@@ -1,0 +1,103 @@
+<h2 id="nutzungsanleitung">Nutzungsanleitung</h2>
+<h3 id="einstellungen">Einstellungen</h3>
+<h4 id="mannschaft-abspeichern">Mannschaft abspeichern</h4>
+<ol type="1">
+<li>Oben den Reiter <em>Mannschaften bearbeiten</em> öffnen.</li>
+<li><strong>Falls</strong> eine neue Mannschaft hinzugefügt werden soll auf <em>Mannschaft hinzufügen</em> klicken. <strong>Sonst</strong> bei der Mannschaft, die bearbeitet werden soll auf <em>Bearbeiten</em> klicken.</li>
+<li><em>Kürzel</em>: Ein kürzel Auswählen, das die Mannschaft innerhalb der Seite eindeutig definiert. Es wird z.B. bei den Widgets benötigt um die Mannschaft auszuwählen. Es empfehlen sich eindeutige Abkürzungen wie <em>mA1</em> für männliche A1-Jugend oder <em>d1</em> für Damen 1.</li>
+<li><em>Name</em>: Der Name, der verwendet wird um den Vereinsnamen zu ersetzen. In Spielplänen und Tabellen kann anstatt dem Vereinsnamen der Mannschaftsname angezeigt werden. Der Name sollte Vereinsintern wiedererkannt werden.</li>
+<li><em>Link (Liga)</em>: Der Link, welcher auf <a href="https://handball4all.de">Handball4All</a> zur Liga führt. Link finden:
+<ol type="1">
+<li><a href="https://handball4all.de">Handball4All</a> öffnen.</li>
+<li>Entsprechenden Bereich auswählen.</li>
+<li>Entsprechende Liga auswählen.</li>
+<li><strong>Wichtig</strong>: Die Mannschaft aus der Tabelle auswählen.</li>
+<li>Den Link aus der Addresszeile kopieren und ins entsprechende Feld einfügen.</li>
+</ol></li>
+<li><em>Link (Pokal)</em>: Der Link, welcher zum Pokalwettbewerb der Mannschaft führt (falls vorhanden). Link finden: Wie oben, jedoch Schritt 4 auslassen.</li>
+<li>Auf den Button <em>Speichern</em> klicken.</li>
+</ol>
+<h3 id="widgets">Widgets</h3>
+<p>Die folgenden Widgets werden vom Plugin bereitgestellt. Zu allen Widgets ist ein äquivalenter Shortcode vorhanden, der an Stellen verwendet werden kann, an denen keine Widgets eingesetzt werden können. Die Angaben in Klammern geben Hinweise auf die Verwendung der Shortcodes. Mehr Informationen zu Shortcodes gibt es in der <a href="https://codex.wordpress.org/Shortcode">offiziellen Anleitung</a>.</p>
+<h4 id="game-widget">Game Widget</h4>
+<p>Das Game Widget ist an sich nicht verwendbar, bildet jedoch die Grundlage für das Team- und Gym Widget. Die Einstellungen, die sich dem entsprechend auf beide dieser Widgets beziehen sind hier aufgeführt.</p>
+<h5 id="einstellungen-1">Einstellungen</h5>
+<ol type="1">
+<li>Titel (<code>title</code>) Der Titel, der über den Spielen angezeigt werden soll. (Standard: <em>leer</em>)</li>
+<li>Namen ersetzen (<code>replace_names</code>) Legt fest, ob der Name des eigenen Teams in jedem einzelnen Spiel ersetzt werden soll. Wenn diese Option ausgewählt ist wird das eigene Team mit dem internen Namen ersetzt (z.B. Herren 1). (<code>0</code>/<code>1</code> / <code>'false'</code>/<code>'true'</code>, Standard: Nein)</li>
+<li>Richtung (<code>direction</code>) Legt fest, wie die Anzeige formatiert ist:
+<ul>
+<li>Horizontal (<code>'hor'</code>, Standard): Die Gegner werden nebeneinander angezeigt, das Ergebnis darunter. Benötigt viel Platz.</li>
+<li>Vertikal (<code>'ver'</code>): Die Gegner werden übereinander angezeigt, das Ergebnis daneben. Geeignet für schmalere Ansichten, da weniger nebeneinander steht.</li>
+<li>Tabelle (<code>'tab'</code>): Alle Spiele werden in einer Tabelle zusammengefasst; jedes Spiel benötigt nur eine Zeile. Sehr Kompakte ansicht.</li>
+</ul></li>
+<li>Wettbewerbe (<code>'select'</code>) Wählt aus, welcher Wettbewerb (Liga, Pokal) angezeigt werden soll. (<code>'league'</code>, <code>'cup'</code>, <code>'both'</code>, Standard: Liga)</li>
+<li>Zeitliche Einschänkung (<code>time_select</code>) Wählt aus welcher Zeitraum berücksichtigt werden soll.
+<ul>
+<li>Keine Einschränkung (<em>leer</em>, Standard)</li>
+<li>Manuell (<code>'man'</code>)</li>
+<li>Heute (<code>'today'</code>)</li>
+<li>Letztes Wochenende (<code>'last_we'</code>)</li>
+<li>Nächstes Wochenende (<code>'next_we'</code>)</li>
+<li>Letztes und nächstes Wochenende (<code>'last_next_we'</code>)</li>
+</ul></li>
+<li>vergangene Tage (<code>time_before</code>) / nächste Tage (<code>time_after</code>) (nur, wenn <em>Zeitliche Einschänkung</em> auf <em>Manuell</em>) Legt fest, wie viele vergangene/zukünftige Tage für die Spielauswahl verwendet werden sollen.</li>
+</ol>
+<h4 id="team-widget">Team Widget</h4>
+<pre><code>[gtp_teams /]</code></pre>
+<p>Das Team Widget zeigt die Spiele von einem oder mehreren registrierten Teams an.</p>
+<h5 id="einstellungen-2">Einstellungen</h5>
+<ol type="1">
+<li>Teams (<code>teams</code>) Eine druch Kommata getrennte Liste von Teamkürzeln von jenen Teams, deren Spiele angezeigt werden sollen. Wird dieses Feld freigelassen werden alle Teams ausgewählt. (Standard: Alle Teams)</li>
+<li>Linktext (<code>link</code>): Wird ein Linktext angegeben wird unter der Spielanzeige ein Link zu <a href="https://handball4all.de">Handball4All</a> platziert.<br />
+<strong>Wenn</strong> exakt ein Team und ein bestimmter Wettbewerb ausgewählt ist zeigt der Link auf die Wettbewerbsseite dieses Teams.<br />
+<strong>Sonst</strong> wird in jedem Fall der in den allgemeinen Einstellungen gesetzte Clublink verwendet, da nur hier mehrere Teams und/oder Wettbewerbe zu sehen sind.<br />
+(Standart: <em>kein Link</em>)</li>
+<li><em>alle Einstellungen des <a href="#game-widget">Game Widget</a>s</em></li>
+</ol>
+<h4 id="gym-widget">Gym Widget</h4>
+<pre><code>[gtp_gym /]</code></pre>
+<p>Das Gym Game Widget zeigt Spiele an, die in einer bestimmten Halle stattfinden. <strong>Hinweis</strong>: Es können nur Spiele von Teams erfasst werden, die auch registriert sind. Spiele von anderen Vereinen oder Events aus anderen Sportarten / Organisationen werden nicht erfasst.</p>
+<h5 id="einstellungen-3">Einstellungen</h5>
+<ol type="1">
+<li>Hallennummer (<code>gym_no</code>) Die Nummer der Halle, wie sie von <a href="1">Handball4All</a> angegeben wird.</li>
+<li><em>alle Einstellungen des <a href="#game-widget">Game Widget</a>s</em></li>
+</ol>
+<h4 id="table-widget">Table Widget</h4>
+<pre><code>[gtp_table /]</code></pre>
+<p>Das Table Widget zeigt die Tabelle eines Teams an.</p>
+<h5 id="einstellungen-4">Einstellungen</h5>
+<ol type="1">
+<li>Titel (<code>title</code>) Der Titel, der über der Tabelle angezeigt werden soll. (Standard: <em>leer</em>)</li>
+<li>Team (<code>team</code>) Das Team, dessen Tabelle angezeigt werden soll. (vgl. <a href="#game-widget">Game Widget</a>)</li>
+<li>Ansicht (<code>view</code>) Gibt an, ob eine breite, detailreichere, oder eine schmale, detailärmere Variante der Tabelle dargestellt wird.
+<ul>
+<li>Standard (<code>'standard'</code>, Standard)<br />
+| Plazierung | Teamname | Anz. Spiele | <strong>S:U:N | Tore</strong> | Punkte |</li>
+<li>Schmal (<code>'slim'</code>)<br />
+| Plazierung | Teamname | Anz. Spiele | Punkte |</li>
+</ul></li>
+<li>Linktext (<code>link</code>) Wenn der Linktext gesetzt ist wird unter der Tabelle ein Link zur Ligaseite des Teams auf <a href="https://handball4all.de">Handball4All</a> platziert.<br />
+(Standart: <em>kein Link</em>)</li>
+</ol>
+<h3 id="weitere-shortcodes">Weitere Shortcodes</h3>
+<h4 id="clublink">Clublink</h4>
+<p>Mit dem Clublink-Shortcode lässt sich ein Link zur Clubseite auf Handball4All einfügen. Der Link zeigt auf die Seite, die in der Einstellung <em>Clublink</em> hinterlegt ist und öffnet in einem neuen Tab, solange das Attribut <code>'target'</code> nicht überschrieben wird.</p>
+<h5 id="attribute">Attribute</h5>
+<ul>
+<li><code>target</code> (optional): Das HTML-<code>target</code>-Attribut für HTML-<code>a</code>-Elemente. <a href="https://www.w3schools.com/tags/att_a_target.asp">Details</a></li>
+</ul>
+<h5 id="beispiel">Beispiel</h5>
+<pre><code>[gtp_clublink]zur Clubansicht auf Handball4All[/gtp_clublink]
+[gtp_clublink target=&#39;_self&#39;]zur Clubansicht auf Handball4All[/gtp_clublink]</code></pre>
+<h4 id="teamlink">Teamlink</h4>
+<p>Mit dem Teamlink-Shortcode lässt sich ein Link zur Liga- oder Pokalseite eines Teams erstellen. Der Link zeigt auf jene Seite, die beim gewählten Team eingetragen ist. das <code>'target'</code>-Attribut funktioniert identisch zum <a href="#clublink">Clublink</a>.</p>
+<h5 id="attribute-1">Attribute</h5>
+<ul>
+<li><code>team</code>: Das Team, dessen Link verwendet werden soll.</li>
+<li><code>comp</code> (optional): Der Wettbewerb, dessen Link verwendet werden soll. (<code>'cup'</code> / <code>'league'</code> (Standard))</li>
+<li><code>target</code> (optional)</li>
+</ul>
+<h5 id="beispiel-1">Beispiel</h5>
+<pre><code>[gtp_team_link team=&#39;h2&#39;]Tabelle der Herren 2 auf Handball4All[/gtp_team_link]
+[gtp_team_link team=&#39;h2&#39; comp=&#39;cup&#39; target=&#39;_self&#39;]Pokalseite der Herren 2 auf Handball4all[/gtp_team_link]</code></pre>

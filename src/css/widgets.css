@@ -1,0 +1,43 @@
+/*
+This stylesheet is used to style the widgets.
+To style the widgets the following classes are available.
+
+
+General:
+All Widgets have the .game-table-widget base class.
+.game-table-widget
+
+
+Games:
+
+All game widgets have the .game-table-widget-games class.
+.game-table-widget-games
+
+Above that every game-widget has a class to indicate the used direction:
+.game-table-widget-games-hor
+.game-table-widget-games-ver
+.game-table-widget-games-tab
+
+The element holding a team that belongs to the club (always a <td>) has the
+.game-table-widget-games-team class:
+.game-table-widget-games-team
+
+
+Table:
+
+All Table wigets have the .game-table-widgets-table class:
+.game-table-widget-table
+
+Above that the view setting is indicated.
+.game-table-widget-table-standart
+.game-table-widget-table-slim
+
+The element holding the chosen team (<tr>) has the .game-table-widget-table-team
+class:
+.game-table-widget-table-team
+
+Paste your custom CSS-Code below.
+This file is in the head of every of your WP-pages, but should only access the
+widgets provided by the Game Table Plugin.
+It can manipulate any other elements as well but is NOT supposed to do so.
+*/
