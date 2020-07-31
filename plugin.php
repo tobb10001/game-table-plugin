@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Game Table Widget
  * Description: Speichert Spiele und Tabellen von Teams, die auf Handball4All registriert sind und stellt Wigets zur verfügung, mit denen diese angezeigt werden können.
- * Version: 4.0.3
+ * Version: 4.1.0
  * Author: Tobias Fischer
  */
 
@@ -221,6 +221,7 @@ function get_backup(){
 function create_options(){
 	add_option('gtp_clublink');
     add_option('gtp_teamname');
+	add_option('gtp_next_force', strtotime('tomorrow'));
 }
 
 function register_cron(){

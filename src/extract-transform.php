@@ -20,7 +20,7 @@ function game_start_time($game) {
 		'20' . substr($start_str, 6, 2) //year
 		. substr($start_str, 3, 2) // month
 		. substr($start_str, 0, 2) // day
-		. 'T' . (($gamet->gTime != '') ? $game->gTime : '00:00') . ':00' // time
+		. 'T' . (($game->gTime != '') ? $game->gTime : '00:00') . ':00' // time
 	);
 
 	return $start_time;
@@ -222,13 +222,55 @@ function extract_transform(){
 
 	$teams = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gtp_teams", OBJECT);
 
+	/**
+	 * Find out if this is a forced run.
+	 * In a forced run all data is reloaded while in a not-forced run this
+	 * function decides on the fly which data needs to be updated.
+	 */
+
+	$nextForce = get_option('gtp_next_force');
+	if($nextForce <= time()){
+		$force = true;
+		update_option('gtp_next_force', strtotime('tomorrow'));
+	}else{
+		$force = false;
+	}
+
 	// cycle through teams and save all games to the database
 
 	foreach($teams as $team){
+
+		if(!$force){
+			/**
+			 * Decide whether or not the current team needs to be updated.
+			 * A team is then updated if a game of this team has started three
+			 * hours ago.
+			 */
+
+			$start = time() - 3 * 3600;
+			$current_games = $wpdb->get_results(
+				"SELECT type, COUNT(type) as count
+				FROM {$wpdb->prefix}gtp_games
+				WHERE origin_team = {$team->shortN}
+					AND start BETWEEN {$start} AND UNIX_TIMESTAMP()
+				GROUP BY type",
+				OBJEKT_K
+			);
+
+			$get_league = $current_games['LEAGUE']->count > 0;
+			$get_cup = $current_games['CUP']->count > 0;
+
+			if(!($get_league || $get_cup)) continue;
+
+		}else{
+			$get_league = true;
+			$get_cup = true;
+		}
+
 		/**
 		 * League Data
 		 */
-		if($team->league_ogId !== null) {
+		if($get_leauge && $team->league_ogId !== null) {
 			//configure endpoint
 			$link = "https://spo.handball4all.de/service/if_g_json.php?ca=0&cl=$team->league_lId&cmd=ps&ct={$team->league_tId}&og={$team->league_ogId}";
 
@@ -272,7 +314,7 @@ function extract_transform(){
 		/**
 		 * Cup Data
 		 */
-		if($team->cup_ogId !== null) {
+		if($get_cup && $team->cup_ogId !== null) {
 			// configuring endpoint
 			$link = "https://spo.handball4all.de/service/if_g_json.php?ca=0&cl={$team->cup_lId}&cmd=ps&og={$team->cup_ogId}";
 

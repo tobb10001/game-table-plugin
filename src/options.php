@@ -15,7 +15,7 @@ if(!current_user_can('manage_options')) {
 // get database to display later
 global $wpdb;
 
-$teams = (array) $wpdb->get_results(
+$sql =
 	"SELECT
 		shortN,
 		longN,
@@ -24,9 +24,9 @@ $teams = (array) $wpdb->get_results(
 		IF(ISNULL(cup_link), '', cup_link) as cup_link,
 		CONCAT('[…]', SUBSTRING(IF(ISNULL(cup_link), '', cup_link), 40)) as cup_link_short
 	FROM {$wpdb->prefix}gtp_teams
-	ORDER BY shortN ASC",
-	OBJECT
-);
+	ORDER BY shortN ASC";
+
+$teams = (array)$wpdb->get_results($sql, OBJECT);
 
 // add an empty entity to enable adding a new team
 array_unshift($teams, (object) ['shortN' => '_new', 'longN' => '', 'league_link' => '', 'cup_link' => '']);
