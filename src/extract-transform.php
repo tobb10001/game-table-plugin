@@ -251,14 +251,14 @@ function extract_transform(){
 			$current_games = $wpdb->get_results(
 				"SELECT type, COUNT(type) as count
 				FROM {$wpdb->prefix}gtp_games
-				WHERE origin_team = {$team->shortN}
+				WHERE origin_team = '{$team->shortN}'
 					AND start BETWEEN {$start} AND UNIX_TIMESTAMP()
 				GROUP BY type",
-				OBJEKT_K
+				OBJECT_K
 			);
 
-			$get_league = $current_games['LEAGUE']->count > 0;
-			$get_cup = $current_games['CUP']->count > 0;
+			$get_league = array_key_exists('LEAGUE', $current_game) ? $current_games['LEAGUE']->count > 0 : false;
+			$get_cup = array_key_exists('CUP', $current_games) ? $current_games['CUP']->count > 0 : false;
 
 			if(!($get_league || $get_cup)) continue;
 
@@ -270,7 +270,7 @@ function extract_transform(){
 		/**
 		 * League Data
 		 */
-		if($get_leauge && $team->league_ogId !== null) {
+		if($get_league && $team->league_ogId !== null) {
 			//configure endpoint
 			$link = "https://spo.handball4all.de/service/if_g_json.php?ca=0&cl=$team->league_lId&cmd=ps&ct={$team->league_tId}&og={$team->league_ogId}";
 

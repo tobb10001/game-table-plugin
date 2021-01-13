@@ -78,13 +78,14 @@ function options() {
 
 add_action('admin_notices', function (){
 	$notice = get_option('gtp_notice', false);
-	if(!$notice){ return; }
-	?>
-		<div class='notice notice-<?= esc_attr($notice['type']); ?> <?= ($notice['dismissible']) ? 'is-dismissible' : ''; ?>'>
-			<p><?= $notice['message']; ?></p>
-		</div>
-	<?php
-	delete_option('gtp_notice');
+	if($notice){
+		?>
+			<div class='notice notice-<?= esc_attr($notice['type']); ?> <?= ($notice['dismissible']) ? 'is-dismissible' : ''; ?>'>
+				<p><?= $notice['message']; ?></p>
+			</div>
+		<?php
+		delete_option('gtp_notice');
+	}
 });
 
 /**
@@ -143,7 +144,7 @@ function create_db_tables() {
             guest_goals_ht int,
             host_points int(2),
             guest_points int(2),
-            own_team varchar(8),
+            own_team ENUM('host', 'guest'), -- varchar(8),
             type ENUM('LEAGUE', 'CUP'),
             PRIMARY KEY (gID),
             CONSTRAINT fk_team_game
@@ -221,7 +222,7 @@ function get_backup(){
 function create_options(){
 	add_option('gtp_clublink');
     add_option('gtp_teamname');
-	add_option('gtp_next_force', strtotime('tomorrow'));
+	add_option('gtp_next_force', time() - 1);
 }
 
 function register_cron(){
@@ -244,10 +245,11 @@ register_deactivation_hook(__FILE__, function () {
 
 function delete_db_tables(){
 	global $wpdb;
+
+	// tables dropped in the correct order so that no constraint is violated in the process
 	$wpdb->query("DROP TABLE {$wpdb->prefix}gtp_games;");
 	$wpdb->query("DROP TABLE {$wpdb->prefix}gtp_tables;");
 
-	// needs to be deleted last because of the constraints
 	$wpdb->query("DROP TABLE {$wpdb->prefix}gtp_teams;");
 
 }
@@ -273,6 +275,7 @@ function make_backup(){
 function remove_options(){
 	delete_option('gtp_clublink');
 	delete_option('gtp_teamname');
+	delete_option('gtp_next_force');
 }
 
 function unregister_cron(){
@@ -288,10 +291,10 @@ function unregister_cron(){
 
 // add a new filter to enable a cron to be called every five minutes
 add_filter( 'cron_schedules', 'add_game_actualization_filter' );
-function add_game_actualization_filter( $schedules ) {
+function add_game_actualization_filter($schedules) {
 	$schedules['five_minutes'] = [
 		'interval' => 300,
-		'display'  => esc_html__( 'Every Five Minutes' )
+		'display'  => esc_html__('Every Five Minutes')
 	];
 
 	return $schedules;
@@ -299,6 +302,7 @@ function add_game_actualization_filter( $schedules ) {
 
 // link the actualization function to the corresponding hook
 const ACTUALIZATION_HOOK = 'game_actualization_hook';
+
 require_once GTP_DIR . '/src/extract-transform.php';
 add_action(ACTUALIZATION_HOOK, 'extract_transform');
 

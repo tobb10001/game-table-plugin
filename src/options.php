@@ -20,9 +20,9 @@ $sql =
 		shortN,
 		longN,
 		IF(ISNULL(league_link), '', league_link) as league_link,
-		CONCAT('[…]', SUBSTRING(IF(ISNULL(league_link), '', league_link), 40)) as league_link_short,
+		IF(ISNULL(league_link), '<em>NA</em>', CONCAT('[…]', SUBSTRING(league_link, 40))) as league_link_short,
 		IF(ISNULL(cup_link), '', cup_link) as cup_link,
-		CONCAT('[…]', SUBSTRING(IF(ISNULL(cup_link), '', cup_link), 40)) as cup_link_short
+		IF(ISNULL(cup_link), '<em>NA</em>', CONCAT('[…]', SUBSTRING(cup_link, 40))) as cup_link_short
 	FROM {$wpdb->prefix}gtp_teams
 	ORDER BY shortN ASC";
 
@@ -114,7 +114,8 @@ $style = file_get_contents(GTP_DIR . '/src/css/widgets.css');
 		</p>
 		<p>
 			<label for="name-<?= esc_attr($team->shortN); ?>">Name:</label>
-			<input type="text" name="name" value="<?= esc_attr($team->longN); ?>"	size="16" id="name-<?= esc_attr($team->shortN); ?>"	required />
+			<input type="text" name="name" value="<?= esc_attr($team->longN); ?>"
+				size="16" id="name-<?= esc_attr($team->shortN); ?>"	required />
 		</p>
 		<p>
 			<label for="link-league-<?= esc_attr($team->shortN); ?>">Link (Liga):</label>

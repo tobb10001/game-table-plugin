@@ -503,9 +503,9 @@ abstract class Game_Widget extends WP_Widget{
         ?>
 
         <?php
-		if(!count($to_show) > 0){ ?>
-			<p>Keine Spiele.</p>
-		<? }elseif($direction == 'hor'){
+		if(!count($to_show) > 0){
+			echo "<p>Keine Spiele.</p>";
+		}elseif($direction == 'hor'){
             foreach($to_show as $game){
             ?>
                 <table class='game-table-widget-games game-table-widget-games-hor'>
