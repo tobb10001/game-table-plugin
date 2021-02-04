@@ -43,9 +43,9 @@
 </ul></li>
 <li>vergangene Tage (<code>time_before</code>) / nächste Tage (<code>time_after</code>) (nur, wenn <em>Zeitliche Einschänkung</em> auf <em>Manuell</em>) Legt fest, wie viele vergangene/zukünftige Tage für die Spielauswahl verwendet werden sollen.</li>
 </ol>
-<h4 id="team-widget">Team Widget</h4>
-<pre><code>[gtp_teams /]</code></pre>
-<p>Das Team Widget zeigt die Spiele von einem oder mehreren registrierten Teams an.</p>
+<h4 id="team-games-widget">Team Games Widget</h4>
+<pre><code>[gtp_team_games /]</code></pre>
+<p>Das Team Game Widget zeigt die Spiele von einem oder mehreren registrierten Teams an.</p>
 <h5 id="einstellungen-2">Einstellungen</h5>
 <ol type="1">
 <li>Teams (<code>teams</code>) Eine druch Kommata getrennte Liste von Teamkürzeln von jenen Teams, deren Spiele angezeigt werden sollen. Wird dieses Feld freigelassen werden alle Teams ausgewählt. (Standard: Alle Teams)</li>
@@ -80,6 +80,9 @@
 <li>Linktext (<code>link</code>) Wenn der Linktext gesetzt ist wird unter der Tabelle ein Link zur Ligaseite des Teams auf <a href="https://handball4all.de">Handball4All</a> platziert.<br />
 (Standart: <em>kein Link</em>)</li>
 </ol>
+<h4 id="team-widget">Team Widget</h4>
+<pre><code>[gtp_team /]</code></pre>
+<p>Das Team Widget lässt den Nutzer ein Team auswählen und zeigt dessen Tabelle, sowie dessen gesamten Spielplan an.</p>
 <h3 id="weitere-shortcodes">Weitere Shortcodes</h3>
 <h4 id="clublink">Clublink</h4>
 <p>Mit dem Clublink-Shortcode lässt sich ein Link zur Clubseite auf Handball4All einfügen. Der Link zeigt auf die Seite, die in der Einstellung <em>Clublink</em> hinterlegt ist und öffnet in einem neuen Tab, solange das Attribut <code>'target'</code> nicht überschrieben wird.</p>

@@ -1,158 +1,144 @@
 <?php
 
 /**
- * This script holds the Team_Widget class.
- * This script MUST NOT be included directly. To include widgets include
- * class-gtp-widget.php
- * @see src/widgets/class-gtp-widget.php
+ * This script holds the Team_Widget-class.
+ * This script MUST NOT be included from anywhere else than gtp-widget.php
+ * Include gtp-widgets.php to access this file.
+ * @see src/widgets/gtp-widgets.php
  */
 
-class Team_Widget extends Game_Widget{
+class Team_Widget extends WP_Widget {
 
-    // WP standard __construct
-    public function __construct(){
-        parent::__construct(
-            'Team_widget',
-            'Team Widget',
+	// WP standard constructor
+	public function __construct() {
+		parent::__construct(
+			'Team_Widget',
+			__('Team Widget', 'text_domain'),
 			[
-				'classname'   => 'team_widget',
-				'description' => 'Zeigt die Spiele einer oder mehrerer Mannschaften an.'
+				'classname' => 'team_widget',
+				'description' => 'Zeigt alle Daten zu einem vom Nutzer ausgewählten Team an.'
 			]
-        );
-    }
+		);
+	}
 
-    // WP standard form
-    public function form($instance){
-
-		// get current options
-		$defaults = [
-			'teams' => '',
-			'link'  => '',
-		];
-
-        $instance = wp_parse_args((array) $instance, $defaults);
-
-		// get teams from database to display available teams
-		global $wpdb;
-
-		$teams = $wpdb->get_results("SELECT shortN, longN FROM {$wpdb->prefix}gtp_teams", OBJECT);
-        ?>
-
-        <!-- option: teams -->
-        <p>
-            <label for="<?= $this->get_field_id('teams'); ?>">Teams (durch Kommata getrennte Liste von Teamkürzeln):</label>
-            <input class="widefat"
-                id="<?= $this->get_field_id('teams'); ?>"
-                name="<?= $this->get_field_name('teams'); ?>"
-                value="<?= esc_attr($instance['teams']); ?>"
-            />
-        </p>
-
-		<details>
-			<summary>Verfügbare Teams</summary>
-			<table class='widefat'>
-				<thead>
-					<tr><th>Teamkürzel</th><th>Team</th></tr>
-				</thead>
-				<tbody>
-					<?php foreach($teams as $team){ ?>
-						<tr>
-							<td><?= $team->shortN; ?></td>
-							<td><?= $team->longN; ?></td>
-						</tr>
-					<?php } ?>
-				</tbody>
-			</table>
-		</details>
-
-		<!-- option: link -->
-		<p>
-			<label for='<?= $this->get_field_id('link'); ?>'>Linktext:</label>
-			Erzeugt einen Link zur Seite auf Handball4All, wenn ein Text gegeben ist.
-			<input
-				type="text"
-				name="<?= $this->get_field_name('link'); ?>"
-				id="<?= $this->get_field_id('link'); ?>"
-				value="<?= $instance['link']; ?>"
-				class="widefat"
-			/>
-		</p>
-
-        <hr />
-
-        <?= parent::form($instance); ?>
-
-        <?php
-    }
+	// WP standard form
+	// omitted, as no settings are to be made yet
 
 	// WP standard update
-    public function update($new, $old){
+	// omitted, as no settings are to be made yet
 
-		$old = parent::update($new, $old);
+	// WP standard widget
+	public function widget ($args, $instance) {
 
-        if(isset($new['teams']) && $new['teams'] != ''){
-            $teams = explode(',', $new['teams']);
-            foreach($teams as &$team){
-                $team = trim($team);
-            }
-            unset($team);
-            $old['teams'] = implode(',', $new['teams']);
-        }else{
-            $old['teams'] = '';
-        }
+		// extract needed parameters
+		extract($args);
 
-		$old['link'] = isset($new['link']) ? sanitize_text_field($new['link']) : '';
+		$quarter_hour_seconds = 15 * 60;
 
-        return $old;
+		// find team to display
+		$sel_team = isset($_REQUEST['team']) ? sanitize_text_field($_REQUEST['team']) : null;
 
-    }
-
-    // WP widget
-    public function widget($args, $instance){
-        extract($instance);
-
-        /**
-         * Get data to display.
-         * Extra conditions are calculated before.
-         */
-        $conditions = [];
-        // teams
-        if(!$teams == ''){
-            $conditions[] = "origin_team IN ('" . implode("', '", explode(',', $teams)) . "')";
-        }
-        // select
-        if($select == self::LEAGUE){
-            $conditions[] = "type = 'LEAGUE'";
-        }elseif($select == self::CUP){
-            $condition[] = "type = 'CUP'";
-        }
-
-		/**
-		 * Decide whether to display a link and generate it.
-		 */
-		$appending = '';
-		if($link !== ''){
-			/**
-			 * If only one team is selected and not both competitions are
-			 * selected the corresponding link is taken from the database.
-			 * Otherwise it's always the clublink.
-			 */
-			if($teams !== '' && strpos($teams, ',') === false&& $select !== self::BOTH){
-				// exactly one team (not all and no enumeration); not both comps
-				$field = (($select == 'league') ? 'league' : 'cup') . '_link';
-				global $wpdb;
-				$link_url = $wpdb->get_var(
-					$wpdb->prepare("SELECT {$field} FROM {$wpdb->prefix}gtp_teams WHERE shortN = %s", $teams)
-				);
-			}else{
-				$link_url = get_option('gtp_clublink');
-			}
-			if($link_url){
-				$appending ="<a href='{$link_url}' target='_blank'>{$link}</a>";
-			}
+		// update team if wanted
+		if ($sel_team !== null) {
+			$last_update = team_get_last_update($sel_team);
+		}
+		if ($sel_team !== null && isset($_REQUEST['update']) && time() - $last_update > $quarter_hour_seconds) {
+			extract_transform($sel_team);
 		}
 
-        echo parent::html($args, $instance, implode( ' AND ', $conditions), $appending);
+		// get all user-selectable teams
+		$teams = get_teams_names();
 
-    }
+		// open containers
+		echo $before_widget;
+
+		// user team selection
+		?>
+		<form id="<?= esc_attr($this->id); ?>-form" action="#<?= esc_attr($this->id); ?>-form">
+		<fieldset>
+			<legend>Teamauswahl</legend>
+			<select name="team">
+				<?php foreach($teams as $team){?>
+					<option value="<?= esc_attr($team->shortN); ?>" <?php selected($sel_team, $team->shortN); ?>>
+						<?= $team->longN; ?>
+					</option>
+				<?php } ?>
+			</select>
+			<button type="submit">Anzeigen</button>
+		</fieldset>
+		</form>
+		<?php
+
+		$args = [
+			'before_widget' => '<div class="%s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<p><strong>',
+			'after_title'   => '</strong></p>',
+		];
+
+		if ($sel_team !== null){
+
+			?>
+			<p>
+				Letztes Update dieses Teams: <?= strftime("%a, %d.%m., %H:%M", $last_update); ?>
+				<?php if (time() - $last_update > $quarter_hour_seconds) { ?>
+					<a href="?team=<?= $sel_team; ?>&amp;update"><button>Aktualisieren</button></a>
+				<?php } ?>
+			</p>
+			<?php
+			/**
+			 * register nested widgets
+			 * this could be needed if this widget is created from somewhere other
+			 * than a WP-sidebar
+			 * otherwise this has no effect
+			 */
+			register_widget('Table_Widget');
+			register_widget('Team_Games_Widget');
+			// display the nested widgets
+			the_widget(
+				'Table_Widget',
+				[
+					'team'  => $sel_team,
+					'title' => 'Tabelle',
+					'view'  => 'standard',
+					'link'  => '',
+				],
+				$args
+			);
+			the_widget(
+				'Team_Games_Widget',
+				[
+					'teams'         => $sel_team,
+					'link'          => '',
+					'title'         => 'Spiele',
+					'replace_names' => false,
+					'direction'     => 'tab',
+					'select'        => Game_Widget::BOTH,
+					'time_select'   => '',
+					'time_before'   => 0,
+					'time_after'    => 0,
+				],
+				$args
+			);
+			// link(s) to handball4all
+			$league_link = get_team_link($sel_team, 'league');
+			$cup_link = get_team_link($sel_team, 'cup');
+			if ($league_link !== null || $club_link !== null) {
+				echo "<p>Team auf Handball4all ansehen: ";
+				if ($league_link !== null)
+					echo "<a href='{$league_link}' target=_blank>Liga</a>";
+				if ($cup_link !== null)
+					echo "<a href='{$cup_link}' target=_blank>Pokal</a>";
+				echo "</p>";
+			}
+
+		}
+
+		$clublink = get_option('gtp_clublink');
+		if (strlen($clublink))
+			echo "<p><a href='{$clublink}' target=_blank>Verein auf Handball4All</a> ansehen.</p>";
+
+		// close containers
+		echo $after_widget;
+	}
 }

@@ -7,6 +7,8 @@
  * @see src/widgets/gtp-widgets.php
  */
 
+require_once GTP_DIR . '/src/database.php';
+
 /**
  * The class holds everything that all game widgets use.
  * This class is held absctract because there is no use case for a widget
@@ -345,7 +347,7 @@ abstract class Game_Widget extends WP_Widget{
      * $condition is expected to be an SQL condition (non escaped) that can be
      * linked to existing conditions with AND.
      * Also calculates additional data needed in html().
-	 * @param array $instance - Representation of the instance's settings.
+	 * @param stdClass $time - containing select, before and after
 	 * @param string $added_condition - SQL-Condition applied on top of existing
 	 * ones.
 	 * @return array list of games fitting the condition
@@ -354,30 +356,16 @@ abstract class Game_Widget extends WP_Widget{
 
         // additional conditions
         $conditions = [];
-        if($time->select != ''){
+        if(strlen($time->select)){
             $conditions[] = self::interval_condition(
 				$time->select, $time->before, $time->after
             );
         }
-        if($added_condition != ''){
-            $conditions[] = '(' . $added_condition . ')';
-        }
-        $conditions = (count($conditions) > 0) ? 'AND ' . implode(' AND ', $conditions) : '';
+        if(strlen($added_condition)) $conditions[] = '(' . $added_condition . ')';
 
-        global $wpdb;
+        $conditions = (count($conditions) > 0) ? implode(' AND ', $conditions) : '';
 
-        $games_table = $wpdb->prefix . 'gtp_games';
-        $teams_table = $wpdb->prefix . 'gtp_teams';
-
-        $additional = ($added_condition != '') ? "AND ({$added_condition})" : '';
-
-        $games = $wpdb->get_results((
-            "SELECT {$teams_table}.longN as origin_team_name, {$games_table}.*
-            FROM {$games_table}, {$teams_table}
-            WHERE {$teams_table}.shortN = {$games_table}.origin_team
-                {$conditions}
-            ORDER BY start ASC;"
-        ), OBJECT);
+		$games = get_games_teamnames($conditions, 'start ASC');
 
         foreach($games as $game){
             $game->has_score = self::has_score($game);
@@ -621,9 +609,11 @@ abstract class Game_Widget extends WP_Widget{
                                 <?= ($game->own_team == 'guest' && $replace_names) ? $game->origin_team_name : $game->guest; ?>
                             </td>
                             <td>
-                                <a href='https://www.google.com/maps/search/?api=1&query=<?= urlencode("{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}"); ?>' target="_blank">
-                                    <?= "{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}" ?>
-                                </a>
+								<small>
+	                                <a href='https://www.google.com/maps/search/?api=1&query=<?= urlencode("{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}"); ?>' target="_blank">
+	                                    <?= "{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}" ?>
+	                                </a>
+								</small>
                             </td>
                         </tr>
                     <?php } ?>
@@ -649,5 +639,5 @@ abstract class Game_Widget extends WP_Widget{
  * Include the extending classes.
  */
 
-require_once GTP_DIR . '/src/widgets/class-team-widget.php';
+require_once GTP_DIR . '/src/widgets/class-team-games-widget.php';
 require_once GTP_DIR . '/src/widgets/class-gym-widget.php';

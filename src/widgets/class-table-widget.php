@@ -2,9 +2,9 @@
 
 /**
  * This script holds the widget meant to display the table of one team.
- * This script MUST NOT be included from anywhere else than class-gtp-widget.php
- * Include class-gtp-widget.php to access this file.
- * @see src/widgets/class-gtp-widget.php
+ * This script MUST NOT be included from anywhere else than gtp-widget.php
+ * Include gtp-widget.php to access this file.
+ * @see src/widgets/gtp-widget.php
  */
 
 class Table_Widget extends WP_Widget{
@@ -126,19 +126,10 @@ class Table_Widget extends WP_Widget{
         extract($instance);
 
         // query database
-        global $wpdb;
-        $table = $wpdb->get_results(
-            "SELECT *
-            FROM {$wpdb->prefix}gtp_tables
-			WHERE origin_team = '{$team}'
-			ORDER BY place ASC;",
-            OBJECT
-        );
+		$table = get_teamscores(db_prepare('origin_team = %s', $team), 'place ASC');
 
-		if($link !== ''){
-			$link_url = $wpdb->get_var(
-				"SELECT league_link FROM {$wpdb->prefix}gtp_teams WHERE shortN = '{$team}'"
-			);
+		if(strlen($link)){
+			$link_url = get_team_link($team, 'league');
 		}
 
         // open container

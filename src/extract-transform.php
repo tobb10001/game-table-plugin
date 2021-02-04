@@ -27,115 +27,7 @@ function game_start_time($game) {
 }
 
 /**
- * This function gets called with the name of the own team, the host team name
- * and the guest team name.
- * It returns which one contains the name of the own team, false if none does.
- * It's got the ability to respect the index of the given team.
- * @param string $teamname - the name to search for
- * @param string $host - the host team
- * @param string $guest - the guest team
- * @return false/string - the identifier where the name was found, false
- * if the name wasn't found
- */
-
-function get_own_team($teamname, $host, $guest) {
-
-	// find the team index
-	preg_match('/[0-9]/', $teamname, $matches);
-	$team_index = (int) end($matches);
-
-	// safe as array to access the index in the corresponding given name
-	$host_expl  = explode(' ', $host);
-	$guest_expl = explode(' ', $guest);
-
-	// initialize the result
-	$res = false;
-
-	/**
-	 * The outer if statement finds out whether the team in the game is from the
-	 * club.
-	 * The inner if-statement look at the last part of the teams playing and the
-	 * teamname to find out, whether the inices are the same.
-	 * If it is the first team it won't have a number. In this case (int) of a
-	 * string returns 0 (because a string without number is given), so if it is
-	 * 0 team nr. one is meant.
-	 */
-	if (has_name($host)) {
-		if ((int) end($host_expl) === $team_index || ((int) end($host_expl) === 0 && $team_index === 1)) {
-			$res = 'host';
-		}
-	}
-	if (has_name($guest)) {
-		if ((int) end($guest_expl) === $team_index || ((int) end($guest_expl) === 0 && $team_index === 1)) {
-			$res = 'guest';
-		}
-	}
-
-	return $res;
-}
-
-
-/**
- * This function updates a single game in the database.
- * Parameters are the game itself, the orignin team where it belongs to, the
- * name of the team and the type of game (whether it's a league or cup game)
- * @param stdClass $game - the game to update in the database
- * @param string $origin_team the team the game belongs to
- * @param string $teamname - the name of the team the game belongs to
- * @param string type - the type of game, either 'LEAGUE' or 'CUP'
- * @return void
- */
-function update_db_game($game, $origin_team, $teamname, $type){
-
-	/**
-	 * Preprocessing game data.
-	 */
-
-	$start_time = (int) game_start_time($game); // to UNIX
-
-	$live = $game->live; // bool to bit
-
-	// str to int
-	$game->gHomeGoals = (int) $game->gHomeGoals;
-	$game->gGuestGoals = (int) $game->gGuestGoals;
-	$game->gHomeGoals_1 = (int) $game->gHomeGoals_1;
-	$game->gGuestGoals_1 = (int) $game->gGuestGoals_1;
-	$game->gHomePoints = (int) $game->gHomePoints;
-	$game->gGuestPoints = (int) $game->gGuestPoints;
-
-	// find the own team
-	$own_team = get_own_team($teamname, $game->gHomeTeam, $game->gGuestTeam);
-
-	// update game
-	global $wpdb;
-
-	$wpdb->replace($wpdb->prefix . 'gtp_games',[
-		'origin_team'    => $origin_team,
-		'gID'            => $game->gID,
-		'sGID'           => $game->sGID,
-		'live'           => $live,
-		'gToken'         => $game->gToken,
-		'start'          => $start_time,
-		'gym_name'       => $game->gGymnasiumName,
-		'gym_post_code'  => $game->gGymnasiumPostal,
-		'gym_town'       => $game->gGymnasiumTown,
-		'gym_street'     => $game->gGymnasiumStreet,
-		'gym_no'         => $game->gGymnasiumNo,
-		'host'           => $game->gHomeTeam,
-		'guest'          => $game->gGuestTeam,
-		'host_goals'     => $game->gHomeGoals,
-		'guest_goals'    => $game->gGuestGoals,
-		'host_goals_ht'  => $game->gHomeGoals_1,
-		'guest_goals_ht' => $game->gGuestGoals_1,
-		'host_points'    => $game->gHomePoints,
-		'guest_points'   => $game->gGuestPoints,
-		'own_team'       => $own_team,
-		'type'           => $type,
-	]);
-}
-
-/**
- * $names holds the names that are associated with the club (editable in the
+ * $names will hold the names that are associated with the club (editable in the
  * plugin settings). It is used in the has_name-function, but only needs to be
  * determined once.
  */
@@ -181,6 +73,121 @@ function has_name($string){
 }
 
 /**
+ * function index()
+ * Returns the index of a given team.
+ * @param string $name - the name of the team
+ * @return int - the index of the team
+ */
+function index ($name) {
+	/**
+	 * NOTE: the (int)-cast returns 0 if end() returns a string, that does not
+	 * contain a number or false.
+	 */
+	$name_words = explode(' ', $name);
+	$index = (int) end($name_words);
+	return $index == 0 ? 1 : $index;
+}
+
+/**
+ * function has_own_team
+ * Determines whether one of the teams in the game has the own team.
+ * @param stdClass $game - the game to consider
+ * @return bool
+ */
+function has_own_team ($game) {
+	return has_name($game->gHomeTeam) || has_name($game->gGuestTeam);
+}
+
+/**
+ * function get_own_team()
+ * Determines which one of the teams in the game contains the name of the own team.
+ * It's got the ability to respect the index of the given team.
+ * @param string $teamname - the name to search for
+ * @param stdClass $game - the game to consider
+ * @return false|'host'|'guest' - the identifier where the name was found, false
+ * if the name wasn't found
+ */
+function get_own_team($teamname, $game) {
+
+	$host = $game->gHomeTeam;
+	$guest = $game->gGuestTeam;
+
+	// find the team index
+	$team_index = index($teamname);
+
+	// initialize the result
+	$res = false;
+
+	if (has_name($host) && $team_index == index($host)) {
+		$res = 'host';
+	}
+
+	if (has_name($guest) && $team_index == index($guest)) {
+		$res = 'guest';
+	}
+
+	return $res;
+}
+
+
+/**
+ * This function updates a single game in the database.
+ * Parameters are the game itself, the orignin team where it belongs to, the
+ * name of the team and the type of game (whether it's a league or cup game)
+ * @param stdClass $game - the game to update in the database
+ * @param string $origin_team the team the game belongs to
+ * @param string $teamname - the name of the team the game belongs to
+ * @param string type - the type of game, either 'LEAGUE' or 'CUP'
+ * @return void
+ */
+function update_db_game($game, $origin_team, $teamname, $type){
+
+	/**
+	 * Preprocessing game data.
+	 */
+
+	$start_time = (int) game_start_time($game); // to UNIX
+
+	$live = $game->live; // bool to bit
+
+	// str to int
+	$game->gHomeGoals = (int) $game->gHomeGoals;
+	$game->gGuestGoals = (int) $game->gGuestGoals;
+	$game->gHomeGoals_1 = (int) $game->gHomeGoals_1;
+	$game->gGuestGoals_1 = (int) $game->gGuestGoals_1;
+	$game->gHomePoints = (int) $game->gHomePoints;
+	$game->gGuestPoints = (int) $game->gGuestPoints;
+
+	// find the own team
+	$own_team = get_own_team($teamname, $game);
+
+	// update game
+	update_game([
+		'origin_team'    => $origin_team,
+		'gID'            => $game->gID,
+		'sGID'           => $game->sGID,
+		'live'           => $live,
+		'gToken'         => $game->gToken,
+		'start'          => $start_time,
+		'gym_name'       => $game->gGymnasiumName,
+		'gym_post_code'  => $game->gGymnasiumPostal,
+		'gym_town'       => $game->gGymnasiumTown,
+		'gym_street'     => $game->gGymnasiumStreet,
+		'gym_no'         => $game->gGymnasiumNo,
+		'host'           => $game->gHomeTeam,
+		'guest'          => $game->gGuestTeam,
+		'host_goals'     => $game->gHomeGoals,
+		'guest_goals'    => $game->gGuestGoals,
+		'host_goals_ht'  => $game->gHomeGoals_1,
+		'guest_goals_ht' => $game->gGuestGoals_1,
+		'host_points'    => $game->gHomePoints,
+		'guest_points'   => $game->gGuestPoints,
+		'own_team'       => $own_team,
+		'type'           => $type,
+	]);
+}
+
+/**
  * This function inserts one team into the tables-table.
  * @param stdClass $team - the team to insert
  * @param string $orignin_team - the team the table is associated with
@@ -188,11 +195,7 @@ function has_name($string){
  */
 function insert_db_teamscore($team, $origin_team){
 
-	global $wpdb;
-
-	$has_name = has_name($team->tabTeamname);
-
-	$wpdb->replace($wpdb->prefix . 'gtp_tables', [
+	update_teamscore([
 		'origin_team'    => $origin_team,
 		'place'          => $team->tabScore,
 		'team'           => $team->tabTeamname,
@@ -204,7 +207,7 @@ function insert_db_teamscore($team, $origin_team){
 		'goals_recieved' => $team->numGoalsGot,
 		'points_plus'    => $team->pointsPlus,
 		'points_minus'   => $team->pointsMinus,
-		'has_name'       => $has_name,
+		'has_name'       => (int) has_name($team->tabTeamname),
 	]);
 }
 
@@ -212,67 +215,37 @@ function insert_db_teamscore($team, $origin_team){
  * This function is directly hooked to the cronjob.
  * It is responsible for keeping the games and tables stored in the databse
  * up to date.
- * @return void
+ * @param string[]|vararg ...$teams - the teams to refresh; if the first
+ * argument is an array further ones are ignored
  */
-function extract_transform(){
-
-	global $wpdb;
-
-	// load teamdata
-
-	$teams = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gtp_teams", OBJECT);
+function extract_transform(...$teams){
 
 	/**
-	 * Find out if this is a forced run.
-	 * In a forced run all data is reloaded while in a not-forced run this
-	 * function decides on the fly which data needs to be updated.
+	 * determine which teams to refresh and load them
 	 */
-
-	$nextForce = get_option('gtp_next_force');
-	if($nextForce <= time()){
-		$force = true;
-		update_option('gtp_next_force', strtotime('tomorrow'));
-	}else{
-		$force = false;
+	if (count($teams)) {
+		/**
+		 * $placeholders is a string of multiple '%s' separated by ', '
+		 * the construction used prevents a trailing ', '
+		 */
+		$placeholders = implode(', ', array_fill(0, count($teams), '%s'));
+		$teamselect = db_prepare(" AND shortN IN ({$placeholders})", ...$teams);
+	} else {
+		$teamselect = '';
 	}
+	$teams = get_teams("next_update <= " . time() . $teamselect);
 
-	// cycle through teams and save all games to the database
-
+	/**
+	 * cycle through teams and save all games to the database
+	 */
 	foreach($teams as $team){
-
-		if(!$force){
-			/**
-			 * Decide whether or not the current team needs to be updated.
-			 * A team is then updated if a game of this team has started three
-			 * hours ago.
-			 */
-
-			$start = time() - 3 * 3600;
-			$current_games = $wpdb->get_results(
-				"SELECT type, COUNT(type) as count
-				FROM {$wpdb->prefix}gtp_games
-				WHERE origin_team = '{$team->shortN}'
-					AND start BETWEEN {$start} AND UNIX_TIMESTAMP()
-				GROUP BY type",
-				OBJECT_K
-			);
-
-			$get_league = array_key_exists('LEAGUE', $current_game) ? $current_games['LEAGUE']->count > 0 : false;
-			$get_cup = array_key_exists('CUP', $current_games) ? $current_games['CUP']->count > 0 : false;
-
-			if(!($get_league || $get_cup)) continue;
-
-		}else{
-			$get_league = true;
-			$get_cup = true;
-		}
 
 		/**
 		 * League Data
 		 */
-		if($get_league && $team->league_ogId !== null) {
+		if($team->league_link !== null) {
 			//configure endpoint
-			$link = "https://spo.handball4all.de/service/if_g_json.php?ca=0&cl=$team->league_lId&cmd=ps&ct={$team->league_tId}&og={$team->league_ogId}";
+			$link = "https://spo.handball4all.de/service/if_g_json.php?ca=0&cl={$team->league_lId}&cmd=ps&ct={$team->league_tId}&og={$team->league_ogId}";
 
 			// request and store data
 			$content = json_decode(wp_remote_retrieve_body(
@@ -284,7 +257,7 @@ function extract_transform(){
 			$table_list = $content->score;
 
 			// remove all games of the current team
-			$wpdb->delete($wpdb->prefix . 'gtp_games', ['origin_team' => $team->shortN]);
+			remove_games(['origin_team' => $team->shortN]);
 
 			// cycle through and reinsert games
 			foreach($game_list as $game) {
@@ -297,7 +270,7 @@ function extract_transform(){
 			 * rebuild table
 			 * all old data is deleted and rewritten
 			 */
-			$wpdb->delete($wpdb->prefix . 'gtp_tables', ['origin_team' => $team->shortN]);
+			remove_teamscores(['origin_team' => $team->shortN]);
 			foreach($table_list as $index => $teamscore) {
 				if((int) $teamscore->tabScore == 0) {
 					/**
@@ -305,8 +278,14 @@ function extract_transform(){
 					 * This is the case whenever two teams share one score
 					 * therefore the score is equal to the one of the team in
 					 * front.
+					 * The database table however does not allow two teams to
+					 * have the same position due to it's primary key-constraint.
+					 * @see src/database.php
+					 * Therefore, 1 is added so that no collision will occur.
+					 * The positionis will then be correct if goals are
+					 * considered.
 					 */
-					$teamscore->tabScore = $table_list[$index-1]->tabScore;
+					$teamscore->tabScore = $table_list[$index-1]->tabScore + 1;
 				}
 				insert_db_teamscore($teamscore, $team->shortN);
 			}
@@ -314,7 +293,7 @@ function extract_transform(){
 		/**
 		 * Cup Data
 		 */
-		if($get_cup && $team->cup_ogId !== null) {
+		if($team->cup_link !== null) {
 			// configuring endpoint
 			$link = "https://spo.handball4all.de/service/if_g_json.php?ca=0&cl={$team->cup_lId}&cmd=ps&og={$team->cup_ogId}";
 
@@ -326,10 +305,24 @@ function extract_transform(){
 			// write games to database
 			foreach($game_list as $game) {
 				// in cup games it is needed to verify, that the team happens to be in the particular game
-				if(has_name($game->gHomeTeam) || has_name($game->gGuestTeam)) {
+				if(has_own_team($game)) {
 					update_db_game($game, $team->shortN, $team->longN, 'CUP');
 				}
 			}
 		}
+
+		/**
+		 * determine when the next update should be made
+		 * write this time to the database
+		 * the next update is oriented on the first game that hasn't got a press
+		 * report yet. if it is in the past, the next possible update will
+		 * refresh this team again.
+		 * if the game is more than 24 hours in the past it is not taken into
+		 * consideration here, because it is unlikely to have something
+		 * happen to this game just as quick.
+		 */
+		$day_seconds = 24 * 3600;
+		$game_start = get_game_start(db_prepare("origin_team = %s AND sGID = '0' AND start > " . (time() - $day_seconds), $team->shortN), 'start ASC');
+		team_set_update($team->shortN, $game_start);
 	}
 }

@@ -63,13 +63,13 @@ Die Einstellungen, die sich dem entsprechend auf beide dieser Widgets beziehen s
 6. vergangene Tage (`time_before`) / nächste Tage (`time_after`) (nur, wenn *Zeitliche Einschänkung* auf *Manuell*)
     Legt fest, wie viele vergangene/zukünftige Tage für die Spielauswahl verwendet werden sollen.
 
-#### Team Widget
+#### Team Games Widget
 
 ```
-[gtp_teams /]
+[gtp_team_games /]
 ```
 
-Das Team Widget zeigt die Spiele von einem oder mehreren registrierten Teams an.
+Das Team Game Widget zeigt die Spiele von einem oder mehreren registrierten Teams an.
 
 ##### Einstellungen
 
@@ -123,6 +123,14 @@ Das Table Widget zeigt die Tabelle eines Teams an.
 4. Linktext (`link`)
 	Wenn der Linktext gesetzt ist wird unter der Tabelle ein Link zur Ligaseite des Teams auf [Handball4All] platziert.  
 	(Standart: *kein Link*)
+
+#### Team Widget
+
+```
+[gtp_team /]
+```
+
+Das Team Widget lässt den Nutzer ein Team auswählen und zeigt dessen Tabelle, sowie dessen gesamten Spielplan an.
 
 ### Weitere Shortcodes
 

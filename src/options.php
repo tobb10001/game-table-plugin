@@ -12,24 +12,9 @@ if(!current_user_can('manage_options')) {
 	wp_die('Du hast keine gültige Berechtigung zu dieser Seite.');
 }
 
-// get database to display later
-global $wpdb;
-
-$sql =
-	"SELECT
-		shortN,
-		longN,
-		IF(ISNULL(league_link), '', league_link) as league_link,
-		IF(ISNULL(league_link), '<em>NA</em>', CONCAT('[…]', SUBSTRING(league_link, 40))) as league_link_short,
-		IF(ISNULL(cup_link), '', cup_link) as cup_link,
-		IF(ISNULL(cup_link), '<em>NA</em>', CONCAT('[…]', SUBSTRING(cup_link, 40))) as cup_link_short
-	FROM {$wpdb->prefix}gtp_teams
-	ORDER BY shortN ASC";
-
-$teams = (array)$wpdb->get_results($sql, OBJECT);
-
-// add an empty entity to enable adding a new team
-array_unshift($teams, (object) ['shortN' => '_new', 'longN' => '', 'league_link' => '', 'cup_link' => '']);
+// get teams to display later
+require_once GTP_DIR . '/src/database.php';
+$teams = get_teams_settings();
 
 // get style for the style setting
 $style = file_get_contents(GTP_DIR . '/src/css/widgets.css');
@@ -88,7 +73,7 @@ $style = file_get_contents(GTP_DIR . '/src/css/widgets.css');
 		JavaScript ist deaktiviert. Die Bearbeitung der Teams ist ohne JavaScript nicht möglich.
 	</noscript>
 	<!--
-		The following forms are created for each team and made visible
+		The following formsjkddfa are created for each team and made visible
 		(JS; form.style.display = 'initial';) when needed.
 		@see /src/js/form.js
 	-->

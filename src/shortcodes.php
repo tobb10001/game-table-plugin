@@ -13,10 +13,16 @@
  * @return string with the widget's output
  * @see https://developer.wordpress.org/reference/functions/the_widget/
  */
-function capture_widget($widget, $instance){
+function capture_widget($widget, $instance=[]){
 	register_widget($widget);
+	$args = [
+		'before_widget' => '<div class="%s">',
+		'after_widget'  => '</div>',
+		'before_title'  => '<strong>',
+		'after_title'   => '</strong>',
+	];
 	ob_start();
-	the_widget($widget, $instance);
+	the_widget($widget, $instance, $args);
 	return ob_get_clean();
 }
 
@@ -26,9 +32,7 @@ function capture_widget($widget, $instance){
  * @see src/widgtets/class-gtp-widget.php
  */
 
-require_once GTP_DIR . '/src/widgets/gtp-widgets.php';
-
-function teams_shortcode($atts, $content, $tag){
+function team_games_shortcode($atts, $content, $tag){
     $atts = shortcode_atts([
             'title'         => '',
             'teams'         => '',
@@ -41,7 +45,7 @@ function teams_shortcode($atts, $content, $tag){
             'time_after'    => 0,
         ], $atts);
 
-	return capture_widget('Team_Widget', $atts);
+	return capture_widget('Team_Games_Widget', $atts);
 }
 
 function gym_shortcode($atts, $content, $tag){
@@ -67,6 +71,10 @@ function table_shortcode($atts, $content, $tag){
     ], $atts);
 
 	return capture_widget('Table_Widget', $atts);
+}
+
+function team_shortcode($atts, $content, $tag) {
+	return capture_widget('Team_Widget');
 }
 
 /**
@@ -104,15 +112,15 @@ function teamlink_shortcode($atts, $content, $tag){
 	if($atts['team'] == '') return $content;
 	// no team is given: this shortcode is useless
 
-	$fields_possible = [
-		'league' => 'league_link',
-		'cup'    => 'cup_link'
-	];
 	/**
 	 * This array holds the fields that can be selected from the database.
 	 * This makes sure that only the strings in this array can be used and no
 	 * SQL-Injection can be driven through the SELECT-statement.
 	 */
+	$fields_possible = [
+	 'league' => 'league_link',
+	 'cup'    => 'cup_link'
+	];
 
 	if(array_key_exists($atts['comp'], $fields_possible)){
 		$field = $fields_possible[$atts['comp']];
@@ -121,13 +129,7 @@ function teamlink_shortcode($atts, $content, $tag){
 		// no valid competition is selected: this shortcode is useless
 	}
 
-	global $wpdb;
-	$link = $wpdb->get_var(
-		$wpdb->prepare(
-			"SELECT $field FROM {$wpdb->prefix}gtp_teams WHERE shortN = %s",
-			$atts['team']
-		)
-	);
+	$link = get_team_link($atts['team']);
 
 	if(is_null($link)) return $content;
 	// no link is set for the requested team and competition
@@ -136,3 +138,14 @@ function teamlink_shortcode($atts, $content, $tag){
 
 	return "<a href='{$link}' target='{$target}'>{$content}</a>";
 }
+
+/**
+ * register all shortcodes created above
+ */
+add_shortcode('gtp_team_games', 'team_games_shortcode');
+add_shortcode('gtp_gym'  , 'gym_shortcode'  );
+add_shortcode('gtp_table', 'table_shortcode');
+add_shortcode('gtp_team', 'team_shortcode');
+
+add_shortcode('gtp_clublink', 'clublink_shortcode');
+add_shortcode('gtp_team_link', 'teamlink_shortcode');

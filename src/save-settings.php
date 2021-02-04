@@ -6,6 +6,8 @@
  * by the forms.
  */
 
+require_once GTP_DIR . '/src/database.php';
+
 /**
  * This function redirects the user to the settings page and puts a notice
  * into the 'gtp_notice'-option that is displayed on the next load, i.e. the
@@ -100,42 +102,32 @@ function save() {
 	}
 
 	// insert into database
-	global $wpdb;
 	$db_res = null;
 
-	if($short_before !== '_new'){
-		$db_res = $wpdb->update(
-			$wpdb->prefix . 'gtp_teams',
-			[ /* values */
-				'shortN'      => $short,
-				'longN'       => $name,
-				'league_link' => $league_link,
-				'league_ogId' => $league_ogId,
-				'league_lId'  => $league_lId,
-				'league_tId'  => $league_tId,
-				'cup_link'    => $cup_link,
-				'cup_ogId'    => $cup_ogId,
-				'cup_lId'     => $cup_lId
-			],
-			[ /* where */
-				'shortN' => $short_before
-			]
-		);
+	if($short_before === '_new'){
+		$db_res = insert_team([
+			'shortN'      => $short,
+			'longN'       => $name,
+			'league_link' => $league_link,
+			'league_ogId' => $league_ogId,
+			'league_lId'  => $league_lId,
+			'league_tId'  => $league_tId,
+			'cup_link'    => $cup_link,
+			'cup_ogId'    => $cup_ogId,
+			'cup_lId'     => $cup_lId
+		]);
 	}else{
-		$db_res = $wpdb->insert(
-			$wpdb->prefix . 'gtp_teams',
-			[
-				'shortN'      => $short,
-				'longN'       => $name,
-				'league_link' => $league_link,
-				'league_ogId' => $league_ogId,
-				'league_lId'  => $league_lId,
-				'league_tId'  => $league_tId,
-				'cup_link'    => $cup_link,
-				'cup_ogId'    => $cup_ogId,
-				'cup_lId'     => $cup_lId
-			]
-		);
+		$db_res = update_team($short_before, [
+			'shortN'      => $short,
+			'longN'       => $name,
+			'league_link' => $league_link,
+			'league_ogId' => $league_ogId,
+			'league_lId'  => $league_lId,
+			'league_tId'  => $league_tId,
+			'cup_link'    => $cup_link,
+			'cup_ogId'    => $cup_ogId,
+			'cup_lId'     => $cup_lId
+		]);
 	}
 
 	if($db_res === false){
@@ -143,6 +135,8 @@ function save() {
 	}elseif($db_res === 0){
 		return_with_notice('Das zu ändernde Team existiert nicht.', 'warning', true);
 	}else{
+		// directly update the newly introduced team
+		extract_transform($short);
 		return_with_notice('Das Team wurde erfolgreich gespeichert.', 'success', true);
 	}
 }
@@ -158,9 +152,7 @@ function delete() {
 	// check nonce
 	check_admin_referer('gtp_delete_' . $short_before);
 
-	global $wpdb;
-
-	$db_res = $wpdb->delete( $wpdb->prefix . 'gtp_teams', [ 'shortN' => $short_before ] );
+	$db_res = delete_team($short_before);
 
 	if ($db_res === false) {
 		return_with_notice('Es gab einen Datenbankfehler.', 'error', false);
