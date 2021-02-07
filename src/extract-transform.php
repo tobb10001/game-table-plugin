@@ -79,12 +79,9 @@ function has_name($string){
  * @return int - the index of the team
  */
 function index ($name) {
-	/**
-	 * NOTE: the (int)-cast returns 0 if end() returns a string, that does not
-	 * contain a number or false.
-	 */
-	$name_words = explode(' ', $name);
-	$index = (int) end($name_words);
+	/* find the last integer number in the given string */
+	preg_match_all('/[1-9][0-9]*/', $name, $matches);
+	$index = (int) end($matches[0]);
 	return $index == 0 ? 1 : $index;
 }
 
@@ -305,6 +302,7 @@ function extract_transform(...$teams){
 			// write games to database
 			foreach($game_list as $game) {
 				// in cup games it is needed to verify, that the team happens to be in the particular game
+				// because when requesting cup data all games from all teams are delivered
 				if(has_own_team($game)) {
 					update_db_game($game, $team->shortN, $team->longN, 'CUP');
 				}
@@ -323,6 +321,7 @@ function extract_transform(...$teams){
 		 */
 		$day_seconds = 24 * 3600;
 		$game_start = get_game_start(db_prepare("origin_team = %s AND sGID = '0' AND start > " . (time() - $day_seconds), $team->shortN), 'start ASC');
+		if ($game_start == null) $game_tart = strtotime('tomorrow');
 		team_set_update($team->shortN, $game_start);
 	}
 }

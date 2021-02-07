@@ -86,6 +86,8 @@ class Gym_Widget extends Game_Widget{
          */
         $condition = db_prepare("gym_no = %s", $gym_no);
 
+		// request a version where the address is omitted for all games
+		$instance["show_address"] = false;
         echo parent::html($args, $instance, $condition);
     }
 }

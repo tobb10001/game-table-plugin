@@ -73,7 +73,7 @@ $style = file_get_contents(GTP_DIR . '/src/css/widgets.css');
 		JavaScript ist deaktiviert. Die Bearbeitung der Teams ist ohne JavaScript nicht möglich.
 	</noscript>
 	<!--
-		The following formsjkddfa are created for each team and made visible
+		The following forms are created for each team and made visible
 		(JS; form.style.display = 'initial';) when needed.
 		@see /src/js/form.js
 	-->
@@ -101,6 +101,8 @@ $style = file_get_contents(GTP_DIR . '/src/css/widgets.css');
 			<label for="name-<?= esc_attr($team->shortN); ?>">Name:</label>
 			<input type="text" name="name" value="<?= esc_attr($team->longN); ?>"
 				size="16" id="name-<?= esc_attr($team->shortN); ?>"	required />
+			<br>
+			Aus dem Namen des Teams wird der Index errechnet, das heißt, wenn das Team im System mit <em>Teamname 2</em> oder <em>Teamname 3</em> hinterlegt ist, dann muss die <strong>letzte natürliche Zahl</strong> des Namens der Zahl des Teams (im Beispiel 2, bzw. 3) entsprechen.
 		</p>
 		<p>
 			<label for="link-league-<?= esc_attr($team->shortN); ?>">Link (Liga):</label>

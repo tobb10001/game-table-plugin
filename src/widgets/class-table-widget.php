@@ -134,7 +134,7 @@ class Table_Widget extends WP_Widget{
 
         // open container
         echo $before_widget;
-        echo "<div class='game-table-widget game-table-widget-table game-table-widget-table-$view'>";
+        echo "<div class='game-table-widget game-table-widget-table game-table-widget-table-$view ultrawide'>";
 
         // show title if one is given
         if($title !== ''){

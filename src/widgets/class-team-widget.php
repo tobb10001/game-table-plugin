@@ -22,7 +22,13 @@ class Team_Widget extends WP_Widget {
 	}
 
 	// WP standard form
-	// omitted, as no settings are to be made yet
+	public function form ($instance) {
+		// no options, just a hint for the user
+		?>
+		<p>Platzieren von mehr als einem Widget dieser Art kann zu unerwartetem Verhalten führen und sollte daher vermieden werden.</p>
+		<?php
+		return parent::form($insance); // prevent displaying a submit button
+	}
 
 	// WP standard update
 	// omitted, as no settings are to be made yet
@@ -33,7 +39,7 @@ class Team_Widget extends WP_Widget {
 		// extract needed parameters
 		extract($args);
 
-		$quarter_hour_seconds = 15 * 60;
+		$update_thresh = 3600; // amount of time the user cannot force an update
 
 		// find team to display
 		$sel_team = isset($_REQUEST['team']) ? sanitize_text_field($_REQUEST['team']) : null;
@@ -42,7 +48,7 @@ class Team_Widget extends WP_Widget {
 		if ($sel_team !== null) {
 			$last_update = team_get_last_update($sel_team);
 		}
-		if ($sel_team !== null && isset($_REQUEST['update']) && time() - $last_update > $quarter_hour_seconds) {
+		if ($sel_team !== null && isset($_REQUEST['update']) && time() - $last_update > $update_thresh) {
 			extract_transform($sel_team);
 		}
 
@@ -51,10 +57,11 @@ class Team_Widget extends WP_Widget {
 
 		// open containers
 		echo $before_widget;
+		echo '<div class="game-table-widget game-table-widget-team">';
 
 		// user team selection
 		?>
-		<form id="<?= esc_attr($this->id); ?>-form" action="#<?= esc_attr($this->id); ?>-form">
+		<form action="#team-widget-content">
 		<fieldset>
 			<legend>Teamauswahl</legend>
 			<select name="team">
@@ -77,11 +84,13 @@ class Team_Widget extends WP_Widget {
 		];
 
 		if ($sel_team !== null){
-
+			// make sure that weekdays are displayed in the right language
+			setlocale(LC_TIME, get_locale());
 			?>
+			<hr id='team-widget-content' style='display: none;'/>
 			<p>
 				Letztes Update dieses Teams: <?= strftime("%a, %d.%m., %H:%M", $last_update); ?>
-				<?php if (time() - $last_update > $quarter_hour_seconds) { ?>
+				<?php if (time() - $last_update > $update_thresh) { ?>
 					<a href="?team=<?= $sel_team; ?>&amp;update"><button>Aktualisieren</button></a>
 				<?php } ?>
 			</p>
@@ -139,6 +148,7 @@ class Team_Widget extends WP_Widget {
 			echo "<p><a href='{$clublink}' target=_blank>Verein auf Handball4All</a> ansehen.</p>";
 
 		// close containers
+		echo '</div>';
 		echo $after_widget;
 	}
 }

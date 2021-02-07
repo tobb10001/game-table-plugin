@@ -1,0 +1,14 @@
+.ultrawide {
+    /* .ultrawide is given to elements that are to wide to display on mobile
+     * clients. Those should by scrollable horizontally without moving the whole
+     * page. The scrollbar should not be visible, as it is only needed on touch
+     * devices.
+     */
+    overflow-x: scroll;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;
+}
+
+.ultrawide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}

@@ -462,6 +462,9 @@ abstract class Game_Widget extends WP_Widget{
     protected final static function html($args, $instance, $condition='', $appending=''){
 
         extract($args);
+		// insert hidden option
+		if (!array_key_exists('show_address', $instance))
+			$instance['show_address'] = true;
 		extract($instance);
 
         $to_show = self::get_games(
@@ -481,7 +484,7 @@ abstract class Game_Widget extends WP_Widget{
         ?>
         <!-- open containers -->
         <?= $before_widget ?>
-        <div class='game-table-widget game-table-widget-games game-table-widget-games-<?= $direction; ?> <?= self::has_live_game($to_show) ? 'has-live' : ''; ?>'>
+        <div class='game-table-widget game-table-widget-games game-table-widget-games-<?= $direction; ?> <?= self::has_live_game($to_show) ? 'has-live' : ''; ?> ultrawide'>
 
         <!-- display title if given -->
         <?php
@@ -527,16 +530,18 @@ abstract class Game_Widget extends WP_Widget{
                             <td colspan=3><?= self::cancelled_alt($game); ?></td>
                         </tr>
                     <?php } ?>
-                    <tr>
-                        <td colspan=3>
-                            <a
-                                href='https://www.google.com/maps/search/?api=1&query=<?= urlencode("{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}"); ?>'
-                                target='_blank'
-                            >
-                                <?= "{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}"; ?>
-                            </a>
-                        </td>
-                    </tr>
+					<?php if ($show_address){ ?>
+	                    <tr>
+	                        <td colspan=3>
+	                            <a
+	                                href='https://www.google.com/maps/search/?api=1&query=<?= urlencode("{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}"); ?>'
+	                                target='_blank'
+	                            >
+	                                <?= "{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}"; ?>
+	                            </a>
+	                        </td>
+	                    </tr>
+					<?php }?>
                 </table>
             <?php }
         }elseif($direction == 'ver'){
@@ -545,7 +550,7 @@ abstract class Game_Widget extends WP_Widget{
                 <table class='game-table-widget-games game-table-widget-games-ver'>
                     <!-- host -->
                     <tr>
-                        <td class='<?=($game->own_team == 'host') ? 'game_table_widget_games_team' : ''; ?>'>
+                        <td class='<?=($game->own_team == 'host') ? 'game-table-widget-games-team' : ''; ?>'>
                             <?= ($game->own_team == 'host' && $replace_names) ? $game->origin_team_name : $game->host ?>
                         </td>
                         <?php if($game->has_score){ ?>
@@ -557,7 +562,7 @@ abstract class Game_Widget extends WP_Widget{
                     </tr>
                     <!-- guest -->
                     <tr>
-                        <td class='<?=($game->own_team == 'guest') ? 'game_table_widget_games_team' : ''; ?>'>
+                        <td class='<?=($game->own_team == 'guest') ? 'game-table-widget-games-team' : ''; ?>'>
                             <?= ($game->own_team == 'guest' && $replace_names) ? $game->origin_team_name : $game->guest ?>
                         </td>
                         <?php if($game->has_score){ ?>
@@ -608,13 +613,15 @@ abstract class Game_Widget extends WP_Widget{
                             <td class='<?= ($game->own_team == 'guest') ? 'game-table-widget-games-team' : ''; ?>'>
                                 <?= ($game->own_team == 'guest' && $replace_names) ? $game->origin_team_name : $game->guest; ?>
                             </td>
-                            <td>
-								<small>
-	                                <a href='https://www.google.com/maps/search/?api=1&query=<?= urlencode("{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}"); ?>' target="_blank">
-	                                    <?= "{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}" ?>
-	                                </a>
-								</small>
-                            </td>
+							<?php if ($show_address) { ?>
+	                            <td>
+									<small>
+		                                <a href='https://www.google.com/maps/search/?api=1&query=<?= urlencode("{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}"); ?>' target="_blank">
+		                                    <?= "{$game->gym_name}, {$game->gym_street}, {$game->gym_post_code} {$game->gym_town}" ?>
+		                                </a>
+									</small>
+	                            </td>
+							<?php } ?>
                         </tr>
                     <?php } ?>
                 </table>

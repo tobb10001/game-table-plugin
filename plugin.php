@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Game Table Widget
  * Description: Speichert Spiele und Tabellen von Teams, die auf Handball4All registriert sind in der eigenen Datenbank und stellt Wigets und Shortcodes zur verfügung, mit denen diese angezeigt werden können.
- * Version: 5.0.0
+ * Version: 5.1.0
  * Author: Tobias Fischer
  */
 
@@ -159,6 +159,7 @@ add_action(ACTUALIZATION_HOOK, 'extract_transform');
 
 // visitor side
 add_action('wp_enqueue_scripts', function () {
-	wp_enqueue_style('game_table_widget_style', plugins_url('src/css/widgets.css', __FILE__));
+	wp_enqueue_style('game_table_widget_widget_style', plugins_url('src/css/widgets.css', __FILE__));
+	wp_enqueue_style('game_table_widget_style', plugins_url('src/css/client.css', __FILE__));
 	wp_enqueue_script('game_table_widget_script', plugins_url('src/js/client.js', __FILE__));
 });
