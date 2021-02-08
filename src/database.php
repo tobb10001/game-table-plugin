@@ -83,7 +83,7 @@ function create_db_tables () {
             goals_recieved int,
             points_plus int,
             points_minus int,
-            has_name bit,
+            has_name tinyint,
             PRIMARY KEY (origin_team, place),
             CONSTRAINT fk_team_score
                 FOREIGN KEY (origin_team)

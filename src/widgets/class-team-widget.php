@@ -27,7 +27,7 @@ class Team_Widget extends WP_Widget {
 		?>
 		<p>Platzieren von mehr als einem Widget dieser Art kann zu unerwartetem Verhalten führen und sollte daher vermieden werden.</p>
 		<?php
-		return parent::form($insance); // prevent displaying a submit button
+		return parent::form($instance); // prevent displaying a submit button
 	}
 
 	// WP standard update
@@ -49,7 +49,7 @@ class Team_Widget extends WP_Widget {
 			$last_update = team_get_last_update($sel_team);
 		}
 		if ($sel_team !== null && isset($_REQUEST['update']) && time() - $last_update > $update_thresh) {
-			extract_transform($sel_team);
+			extract_transform(true, $sel_team);
 		}
 
 		// get all user-selectable teams

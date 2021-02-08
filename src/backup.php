@@ -21,8 +21,8 @@ function load_backup(){
 	foreach($data->teams as $team){
 		insert_team(
 			[
-				'shortN'      => $team->short,
-				'longN'       => $team->name,
+				'shortN'      => $team->shortN,
+				'longN'       => $team->longN,
 				'league_link' => $team->league_link,
 				'league_ogId' => $team->league_ogId,
 				'league_lId'  => $team->league_lId,
@@ -37,12 +37,12 @@ function load_backup(){
 	update_option('gtp_teamname', $data->teamname);
 	update_option('gtp_clublink', $data->clublink);
 
-	unlink('backup.json');
+	unlink(BACKUP_FILE);
 
 	/**
 	 * refresh all teams; this is slow, but also necessary
 	 */
-	require_once GTP_DIR . '/src/extract_transform.php';
+	require_once GTP_DIR . '/src/extract-transform.php';
 	extract_transform();
 }
 

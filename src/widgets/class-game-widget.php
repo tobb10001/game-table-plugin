@@ -243,7 +243,7 @@ abstract class Game_Widget extends WP_Widget{
 	 * @return stdClass object with $start and $end as UNIX imestamps
      */
 
-    private final static function interval($select, $before=0, $after=0){
+    private static function interval($select, $before=0, $after=0){
 
         // initialize variables
         $interval = new stdClass();
@@ -352,7 +352,7 @@ abstract class Game_Widget extends WP_Widget{
 	 * ones.
 	 * @return array list of games fitting the condition
      */
-    private final static function get_games($time, $added_condition=''){
+    private static function get_games($time, $added_condition=''){
 
         // additional conditions
         $conditions = [];
@@ -382,7 +382,7 @@ abstract class Game_Widget extends WP_Widget{
 	 * @param boolean $ht (optional) whether to consider the halftime only
 	 * @return boolean whether the game has a score
      */
-    private final static function has_score($game, $ht=false){
+    private static function has_score($game, $ht=false){
         if (!$ht) {
             return $game->host_goals > 0 || $game->guest_goals > 0;
         } else {
@@ -396,7 +396,7 @@ abstract class Game_Widget extends WP_Widget{
 	 * @return boolean whether the given game is cancelled
      */
 
-    private final static function cancelled($game){
+    private static function cancelled($game){
     	/**
 		 * NOTE: At the moment there is no way to tell that a game has been
 		 * cancelled. However, this may be possible in the future.
@@ -413,7 +413,7 @@ abstract class Game_Widget extends WP_Widget{
 	 * @param stdClass $game - the game to consider
 	 * @return string alternative to the result after a cancelled game
      */
-    private final static function cancelled_alt($game){
+    private static function cancelled_alt($game){
         $res = false;
         $text = false;
 

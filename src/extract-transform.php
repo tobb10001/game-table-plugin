@@ -215,22 +215,24 @@ function insert_db_teamscore($team, $origin_team){
  * @param string[]|vararg ...$teams - the teams to refresh; if the first
  * argument is an array further ones are ignored
  */
-function extract_transform(...$teams){
+function extract_transform($force=false, ...$teams){
 
 	/**
 	 * determine which teams to refresh and load them
 	 */
+	$condition = [];
 	if (count($teams)) {
 		/**
 		 * $placeholders is a string of multiple '%s' separated by ', '
 		 * the construction used prevents a trailing ', '
 		 */
 		$placeholders = implode(', ', array_fill(0, count($teams), '%s'));
-		$teamselect = db_prepare(" AND shortN IN ({$placeholders})", ...$teams);
-	} else {
-		$teamselect = '';
+		$condition[] = db_prepare("shortN IN ({$placeholders})", ...$teams);
 	}
-	$teams = get_teams("next_update <= " . time() . $teamselect);
+	if (!$force) {
+		$condition[] = "next_update <= " . time();
+	}
+	$teams = get_teams(implode(' AND ', $condition));
 
 	/**
 	 * cycle through teams and save all games to the database
